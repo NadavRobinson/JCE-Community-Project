@@ -19,7 +19,7 @@ import { Button } from "../ui/button";
 import EmergencyButton from "../EmergencyButton/EmergencyButton";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import { Card } from "../ui/card";
-import { X, User as UserIcon, Calendar, Clock, MessageCircle, Plus, Sparkles } from "lucide-react"; // Sparkles might be unused now
+import { X, User as UserIcon, Calendar, Clock, MessageCircle, Plus, Sparkles, Info, CheckCircle, AlertTriangle, Users } from "lucide-react"; // Added Info, CheckCircle, AlertTriangle, Users
 import ChatPanel from "../ui/ChatPanel";
 import CustomAlert from "../ui/CustomAlert";
 // import { User } from "lucide-react"; // Redundant import
@@ -169,6 +169,8 @@ export default function RequesterDashboard() {
     hideNoteField: false, // Initialize with default structure
     customFields: []
   }); // For LifeAdvice
+  const [userStatus, setUserStatus] = useState({ text: "טוען סטטוס...", icon: <LoadingSpinner size="sm" />, color: "text-gray-600" });
+
 
   // Set the appropriate first tab when switching modes
   useEffect(() => {
@@ -407,6 +409,25 @@ export default function RequesterDashboard() {
     return () => unsubPendingRequests.current?.();
   }, [user]);
 
+  // Update user status display based on activeMatch and pendingRequests
+  useEffect(() => {
+    if (activeMatch) {
+      setUserStatus({ text: "נמצא שיבוץ עם מתנדב/ת", icon: <CheckCircle className="w-5 h-5 text-green-500" />, color: "text-green-700" });
+    } else if (pendingRequests.some(req => req.status === "waiting_for_admin_approval")) {
+      setUserStatus({ text: "הבקשה נשלחה וממתינה לאישור מנהל", icon: <Clock className="w-5 h-5 text-blue-500" />, color: "text-blue-700" });
+    } else if (pendingRequests.some(req => req.status === "waiting_for_first_approval")) {
+      setUserStatus({ text: "הבקשה נשלחה וממתינה לאישור המתנדב/ת", icon: <Clock className="w-5 h-5 text-yellow-500" />, color: "text-yellow-700" });
+    } else if (personal && sortedVolunteers.length > 0) {
+      setUserStatus({ text: "ניתן לפנות למתנדבים זמינים", icon: <Users className="w-5 h-5 text-orange-500" />, color: "text-orange-700" });
+    } else if (!personal) {
+      setUserStatus({ text: "ממתין להתאמה על ידי המערכת", icon: <Info className="w-5 h-5 text-purple-500" />, color: "text-purple-700" });
+    }
+    else {
+      setUserStatus({ text: "אין מתנדבים זמינים כרגע במצב פנייה ישירה", icon: <AlertTriangle className="w-5 h-5 text-red-500" />, color: "text-red-600" });
+    }
+  }, [activeMatch, pendingRequests, personal, sortedVolunteers]);
+
+
   /* -------- handlers -------- */
   const flipPersonal = async () => {
     if (!user) return;
@@ -643,46 +664,54 @@ export default function RequesterDashboard() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6"> {/* Adjusted padding for mobile */}
       {/* header + toggle */}
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold text-orange-800 flex-grow">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-orange-800 flex-grow">
           שלום {requestProfile?.fullName?.split(' ')[0] || ''} 👋
         </h1>
-        <Button
-          variant="outline"
-          className="mr-2"
-          onClick={() => window.location.href = '/profile'}
-        >
-          הפרופיל שלי
-        </Button>
-        {/* AI Button removed from here */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-orange-700">פנייה ישירה למתנדב</span>
-          <button
-            onClick={flipPersonal}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors outline-none ring-2 ring-orange-400 ring-offset-2 ${
-              personal ? 'bg-orange-600 border-orange-400' : 'bg-gray-200 border-orange-400'
-            }`}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            className="mr-auto sm:mr-2 w-full sm:w-auto text-sm py-2" // Adjusted for mobile
+            onClick={() => window.location.href = '/profile'}
           >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform border-2 border-orange-400 ${
-                personal ? '-translate-x-1' : '-translate-x-6'
+            הפרופיל שלי
+          </Button>
+          <div className="flex items-center gap-2 mt-2 sm:mt-0">
+            <span className="text-xs sm:text-sm text-orange-700 whitespace-nowrap">פנייה ישירה</span>
+            <button
+              onClick={flipPersonal}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors outline-none ring-2 ring-orange-400 ring-offset-2 ${
+                personal ? 'bg-orange-600 border-orange-400' : 'bg-gray-200 border-orange-400'
               }`}
-            />
-          </button>
-          <span className="text-sm text-orange-700">ללא העדפה</span>
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform border-2 border-orange-400 ${
+                  personal ? '-translate-x-1' : '-translate-x-6'
+                }`}
+              />
+            </button>
+            <span className="text-xs sm:text-sm text-orange-700 whitespace-nowrap">ללא העדפה</span>
+          </div>
         </div>
       </div>
+
+      {/* User Status Display */}
+      <div className={`flex items-center gap-2 p-3 mb-6 rounded-lg border ${userStatus.color.replace('text-', 'border-').replace('-700', '-300').replace('-600', '-300').replace('-500', '-200')} bg-${userStatus.color.replace('text-', '').replace('-700', '-50').replace('-600', '-50').replace('-500', '-50')}`}>
+        {userStatus.icon}
+        <p className={`font-medium text-sm ${userStatus.color}`}>{userStatus.text}</p>
+      </div>
+
       {/* Tabs */}
       <Card className="mb-6">
-        <div className="flex border-b border-gray-200">
+        <div className="flex flex-wrap border-b border-gray-200"> {/* Added flex-wrap */}
           {personal && (
             <>
             <button
                 onClick={() => setActiveTab("available")}
                 className={`
-                  flex-1 p-4 text-center font-medium text-sm focus:outline-none
+                  flex-grow sm:flex-1 p-3 text-center font-medium text-xs sm:text-sm focus:outline-none whitespace-nowrap
                   ${activeTab === "available"
                     ? 'border-b-2 border-orange-500 text-orange-600'
                     : 'text-gray-500 hover:text-gray-700'
@@ -694,33 +723,33 @@ export default function RequesterDashboard() {
               <button
                 onClick={() => setActiveTab("pending")}
                 className={`
-                  flex-1 p-4 text-center font-medium text-sm focus:outline-none
+                  flex-grow sm:flex-1 p-3 text-center font-medium text-xs sm:text-sm focus:outline-none whitespace-nowrap
                   ${activeTab === "pending"
                     ? 'border-b-2 border-orange-500 text-orange-600'
                     : 'text-gray-500 hover:text-gray-700'
                   }
                 `}
               >
-                בקשות שממתינות לאישור מנהל ({adminApprovalRequests.length})
+                בקשות לאישור מנהל ({adminApprovalRequests.length})
               </button>
             </>
           )}
           <button
             onClick={() => setActiveTab("current")}
             className={`
-              flex-1 p-4 text-center font-medium text-sm focus:outline-none
+              flex-grow sm:flex-1 p-3 text-center font-medium text-xs sm:text-sm focus:outline-none whitespace-nowrap
               ${activeTab === "current"
                 ? 'border-b-2 border-orange-500 text-orange-600'
                 : 'text-gray-500 hover:text-gray-700'
               }
             `}
           >
-            השיבוץ הנוכחי שלי ({activeMatch ? 1 : 0})
+            השיבוץ הנוכחי ({activeMatch ? 1 : 0})
           </button>
           <button
             onClick={() => setActiveTab("lifeAdvice")}
             className={`
-              flex-1 p-4 text-center font-medium text-sm focus:outline-none flex items-center justify-center gap-2
+              flex-grow sm:flex-1 p-3 text-center font-medium text-xs sm:text-sm focus:outline-none flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap
               ${activeTab === "lifeAdvice"
                 ? 'bg-gradient-to-r from-orange-400 via-red-400 to-purple-500 text-white shadow-inner'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-orange-50/50'
@@ -728,8 +757,8 @@ export default function RequesterDashboard() {
               transition-all duration-200 ease-in-out
             `}
           >
-            <Sparkles className={`w-4 h-4 ${activeTab === "lifeAdvice" ? 'text-white' : 'text-purple-500'}`} />
-            ייעוץ מהלב AI
+            <Sparkles className={`w-3 h-3 sm:w-4 sm:h-4 ${activeTab === "lifeAdvice" ? 'text-white' : 'text-purple-500'}`} />
+            <span className="truncate">ייעוץ מהלב AI</span>
           </button>
         </div>
       </Card>
