@@ -1,8 +1,9 @@
 import { format } from 'date-fns';
+import { Button } from '../ui/button'; // Assuming Button component exists and is correctly pathed
 
 const DEFAULT_IMAGE = '/images/event_default_image.jpg';
 
-export const EventCard = ({ event }) => {
+export const EventCard = ({ event, currentUser, onShowInterest, isUpcoming }) => {
     // Ensure event is defined and has necessary properties
     if (!event) {
         return <div>Loading...</div>;
@@ -86,6 +87,15 @@ export const EventCard = ({ event }) => {
                             </p>
                         )}
                     </div>
+                    {currentUser && isUpcoming && onShowInterest && (
+                        <div className="mt-4 pt-4 border-t border-orange-200 flex flex-col sm:flex-row gap-2">
+                            <Button 
+                                onClick={() => onShowInterest(event.id, event.name)} 
+                                variant="outline" 
+                                className="w-full sm:w-auto text-orange-600 border-orange-500 hover:bg-orange-50 hover:text-orange-700"
+                            >הבעת עניין</Button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

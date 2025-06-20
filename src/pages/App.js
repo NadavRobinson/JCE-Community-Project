@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import HomePage from "./HomePage";
+import EventsPage from "./EventsPage"; // Import the new EventsPage
 import RegisterVolunteerPage from "../components/auth/RegisterVolunteerPage";
 import RegisterRequesterPage from "../components/auth/RegisterRequesterPage";
 import LoginPage from "../components/auth/LoginPage";
@@ -15,6 +16,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import CustomAlert from "../components/ui/CustomAlert";
+import { AuthProvider } from '../contexts/AuthContext'; // Import AuthProvider
 
 const IDLE_TIMEOUT = 30 * 60 * 1000; // 30 minute in milliseconds
 const WARNING_TIMEOUT = 10 * 1000; // 10 seconds before actual logout
@@ -163,51 +165,54 @@ function ProtectedRoute({ children, allowedRoles }) {
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register-volunteer" element={<RegisterVolunteerPage />} />
-          <Route path="/register-requester" element={<RegisterRequesterPage />} />
-          <Route path="/about" element={<AboutPage />} />
+      <AuthProvider> {/* Wrap your app with AuthProvider */}
+        <Layout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/events" element={<EventsPage />} /> {/* Add the new EventsPage route */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register-volunteer" element={<RegisterVolunteerPage />} />
+            <Route path="/register-requester" element={<RegisterRequesterPage />} />
+            <Route path="/about" element={<AboutPage />} />
 
-          <Route
-            path="/admin-dashboard"
-            element={
-              <ProtectedRoute allowedRoles={["admin-first", "admin-second"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["admin-first", "admin-second"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/requester-dashboard"
-            element={
-              <ProtectedRoute allowedRoles={["requester"]}>
-                <RequesterDashboard />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/requester-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["requester"]}>
+                  <RequesterDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/volunteer-dashboard"
-            element={
-              <ProtectedRoute allowedRoles={["volunteer"]}>
-                <VolunteerDashboard />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/volunteer-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["volunteer"]}>
+                  <VolunteerDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute allowedRoles={["requester", "volunteer", "admin-first", "admin-second"]}>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Layout>
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute allowedRoles={["requester", "volunteer", "admin-first", "admin-second"]}>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Layout>
+      </AuthProvider>
     </Router>
   );
 }
