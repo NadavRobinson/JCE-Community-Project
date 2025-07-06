@@ -371,7 +371,7 @@ export default function UnifiedAnalyticsBarChart() {
 
           <button
             onClick={() => setTimeOffset(o => o + 1)}
-            className="py-2 px-4 text-base sm:py-3 sm:px-6 sm:text-lg border border-orange-300 rounded bg-white text-orange-700 hover:bg-orange-700 hover:text-white disabled:opacity-50 transition-all duration-150"
+            className="py-2 px-4 text-base sm:py-3 sm:px-6 sm:text-lg border border-orange-600 rounded bg-white text-orange-700 hover:bg-orange-600 hover:text-white disabled:opacity-50 transition-all duration-150"
             style={{ minWidth: '90px' }}
             disabled={false}
           >
@@ -386,7 +386,7 @@ export default function UnifiedAnalyticsBarChart() {
           </span>
           <button
             onClick={() => setTimeOffset(o => o - 1)}
-            className="py-2 px-4 text-base sm:py-3 sm:px-6 sm:text-lg border border-orange-300 rounded bg-white text-orange-700 hover:bg-orange-700 hover:text-white disabled:opacity-50 transition-all duration-150"
+            className="py-2 px-4 text-base sm:py-3 sm:px-6 sm:text-lg border border-orange-600 rounded bg-white text-orange-700 hover:bg-orange-600 hover:text-white disabled:opacity-50 transition-all duration-150"
             style={{ minWidth: '90px' }}
             disabled={false}
           >

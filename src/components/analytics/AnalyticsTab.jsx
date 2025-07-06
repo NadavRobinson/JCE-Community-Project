@@ -5,7 +5,7 @@ export const AdminAnalyticsTab = () => {
     console.log('AdminAnalyticsTab rendered');
     return (
         <div >
-                   <UnifiedAnalyticsBarChart /> 
+            <UnifiedAnalyticsBarChart /> 
         </div>
     );
 };
